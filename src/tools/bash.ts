@@ -1,7 +1,7 @@
-import type { Tool } from "@anthropic-ai/sdk/resources";
+import type { ToolDef } from "./index.js";
 import { execSync } from "node:child_process";
 
-export const bash: Tool = {
+const definition: ToolDef = {
     name: "bash",
     description: "Execute a bash command and return stdout/stderr. Dangerous commands (rm -rf, sudo, shutdown, reboot, mkfs, dd, etc.) are blocked.",
     input_schema: {
@@ -21,7 +21,7 @@ export const bash: Tool = {
 };
 
 
-export function runBash(command: string, timeout = 10000): string {
+function handler({ command, timeout = 10000 }: { command: string; timeout?: number }): string {
     const DANGEROUS_PATTERNS = [
         /\brm\s+(-[^\s]*)?r/,       // rm -r, rm -rf, rm -fr, etc.
         /\bsudo\b/,
@@ -60,3 +60,8 @@ export function runBash(command: string, timeout = 10000): string {
         return `[ERROR] Exit code ${err.status}\n${stdout}\n${stderr}`.trim();
     }
 }
+
+export const bashTool = {
+    definition,
+    handler
+};

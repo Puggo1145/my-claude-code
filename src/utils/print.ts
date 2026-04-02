@@ -6,13 +6,16 @@ type PrintTypeConfig = {
 
 const printType: Record<string, PrintTypeConfig> = {
     message: {
-        color: "reset",
+        color: "reset"
     },
     tool: {
-        color: "gray",
+        color: "gray"
+    },
+    error: {
+        color: "red"
     },
     default: {
-        color: "reset",
+        color: "reset"
     },
 }
 

@@ -1,17 +1,27 @@
 import type { MessageParam, ToolUnion } from "@anthropic-ai/sdk/resources";
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
-import { bash } from "./tools/bash.js";
+import { toolProvider } from "./tools/index.js";
 
-const SYSTEM_PROMPT = "You are an helpful assistant.";
-const TOOLS: ToolUnion[] = [bash];
+function getModel() {
+    const MODEL = process.env.MODEL;
+    if (!MODEL) {
+        throw new Error("MODEL is not set");
+    }
+    return MODEL;
+}
+
+const SYSTEM_PROMPT = `You are a coding agent at ${process.cwd()}. Use tools to solve tasks. Act, don't explain.`;
+const TOOLS: ToolUnion[] = toolProvider.getToolDefinitions();
 
 import { createInterface } from "node:readline/promises";
-import { agentLoop } from "./agents/agent_loop.js";
+import { agentLoop } from "./agents/agent-loop.js";
 
 const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY
 });
+
+const model = getModel();
 
 async function main() {
     const messages: MessageParam[] = [];
@@ -23,7 +33,7 @@ async function main() {
             break;
         }
         messages.push({ role: "user", content: query });
-        await agentLoop(messages, client, SYSTEM_PROMPT, TOOLS);
+        await agentLoop(messages, client, model, SYSTEM_PROMPT, TOOLS);
         const responseContent = messages[messages.length - 1]?.content;
         if (Array.isArray(responseContent)) {
             for (const block of responseContent) {
