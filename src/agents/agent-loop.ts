@@ -1,7 +1,7 @@
 import type { MessageParam, ToolUnion } from "@anthropic-ai/sdk/resources";
 import type Anthropic from "@anthropic-ai/sdk";
 import { toolProvider } from "../tools/index.js";
-import { print } from "../utils/print.js";
+import { print, cutContent } from "../utils/print.js";
 
 export async function agentLoop(messages: MessageParam[], client: Anthropic, model: string, systemPrompt: string, tools: ToolUnion[]): Promise<void> {
     let roundsSinceTodo = 0
@@ -37,10 +37,10 @@ export async function agentLoop(messages: MessageParam[], client: Anthropic, mod
                 } else {
                     // execute tool
                     print(`running tool: ${block.name}`, "tool");
-                    print(JSON.stringify(block.input), "tool");
+                    print(cutContent(JSON.stringify(block.input)), "tool");
                     try {
                         output = toolHandler(block.input);
-                        print(`result: ${output}`, "tool");
+                        print(`result:\n${cutContent(output)}`, "tool");
                     } catch (error) {
                         if (error instanceof Error && error.stack) {
                             output = `[ERROR] ${error.stack}`;
@@ -79,3 +79,5 @@ export async function agentLoop(messages: MessageParam[], client: Anthropic, mod
         }
     }
 }
+
+
