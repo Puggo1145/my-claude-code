@@ -3,6 +3,7 @@ import { bashTool } from "./bash.js";
 import { readTool } from "./read.js";
 import { writeTool } from "./write.js";
 import { editTool } from "./edit.js";
+import { todoTool } from "./todo.js";
 
 export type ToolName = string;
 export type ToolDef = AnthropicToolDef;
@@ -49,5 +50,6 @@ toolProvider.register("bash", bashTool);
 toolProvider.register("read", readTool);
 toolProvider.register("write", writeTool);
 toolProvider.register("edit", editTool);
+toolProvider.register("todo", todoTool);
 
 export { toolProvider };

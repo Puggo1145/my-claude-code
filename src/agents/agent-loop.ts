@@ -4,7 +4,10 @@ import { toolProvider } from "../tools/index.js";
 import { print } from "../utils/print.js";
 
 export async function agentLoop(messages: MessageParam[], client: Anthropic, model: string, systemPrompt: string, tools: ToolUnion[]): Promise<void> {
+    let roundsSinceTodo = 0
     while (true) {
+        let usedTodo = false;
+
         const response = await client.messages.create({
             model: model,
             system: systemPrompt,
@@ -34,6 +37,7 @@ export async function agentLoop(messages: MessageParam[], client: Anthropic, mod
                 } else {
                     // execute tool
                     print(`running tool: ${block.name}`, "tool");
+                    print(JSON.stringify(block.input), "tool");
                     try {
                         output = toolHandler(block.input);
                         print(`result: ${output}`, "tool");
@@ -55,8 +59,23 @@ export async function agentLoop(messages: MessageParam[], client: Anthropic, mod
                     tool_use_id: block.id,
                     content: output
                 })
+
+                if (block.name === "todo") {
+                    usedTodo = true;
+                }
             }
         }
+
+        if (usedTodo) {
+            roundsSinceTodo = 0;
+        } else {
+            roundsSinceTodo++;
+        }
+
         messages.push({ role: "user", content: results });
+        // remind agent to update todos if it hasn't used the tool in 3 rounds
+        if (roundsSinceTodo >= 3) {
+            messages.push({ role: "user", content: "<reminder>Update your todos.</reminder>" });
+        }
     }
 }

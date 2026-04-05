@@ -28,9 +28,9 @@ const definition: ToolDef = {
 
 function handler({ path: filePath, old_text: oldText, new_text: newText }: { path: string; old_text: string; new_text: string }): string {
     if (!safePath(filePath)) {
-        return `[BLOCKED] You don't have permission to access a path out of the current working directory.
+        throw new Error(`You don't have permission to access a path out of the current working directory.
 Please double check your path input: ${filePath}.
-Your current working directory is: ${process.cwd()}`;
+Your current working directory is: ${process.cwd()}`);
     }
 
     const resolved = path.resolve(process.cwd(), filePath);
@@ -39,16 +39,16 @@ Your current working directory is: ${process.cwd()}`;
     try {
         content = readFileSync(resolved, "utf-8");
     } catch (err: any) {
-        return `[ERROR] Failed to read file: ${err.message}`;
+        throw new Error(`Failed to read file: ${err.message}`);
     }
 
     const occurrences = content.split(oldText).length - 1;
 
     if (occurrences === 0) {
-        return `[ERROR] old_text not found in ${filePath}. Make sure it matches exactly (including whitespace and indentation).`;
+        throw new Error(`old_text not found in ${filePath}. Make sure it matches exactly (including whitespace and indentation).`);
     }
     if (occurrences > 1) {
-        return `[ERROR] old_text matches ${occurrences} times in ${filePath}. It must match exactly once. Provide more surrounding context to make it unique.`;
+        throw new Error(`old_text matches ${occurrences} times in ${filePath}. It must match exactly once. Provide more surrounding context to make it unique.`);
     }
 
     const updated = content.replace(oldText, newText);
@@ -56,7 +56,7 @@ Your current working directory is: ${process.cwd()}`;
     try {
         writeFileSync(resolved, updated, "utf-8");
     } catch (err: any) {
-        return `[ERROR] Failed to write file: ${err.message}`;
+        throw new Error(`Failed to write file: ${err.message}`);
     }
 
     const lineCount = updated.split("\n").length;

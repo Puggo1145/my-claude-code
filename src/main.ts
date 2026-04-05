@@ -11,7 +11,9 @@ function getModel() {
     return MODEL;
 }
 
-const SYSTEM_PROMPT = `You are a coding agent at ${process.cwd()}. Use tools to solve tasks. Act, don't explain.`;
+const SYSTEM_PROMPT = `You are a coding agent at ${process.cwd()}. 
+Use the todo tool to plan for multi-step tasks at the first
+Prefer tool over prose.`;
 const TOOLS: ToolUnion[] = toolProvider.getToolDefinitions();
 
 import { createInterface } from "node:readline/promises";

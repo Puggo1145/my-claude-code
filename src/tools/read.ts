@@ -28,9 +28,9 @@ const definition: ToolDef = {
 
 function handler({ path: filePath, from, to }: { path: string; from?: number; to?: number }): string {
     if (!safePath(filePath)) {
-        return `[BLOCKED] You don't have permission to access a path out of the current working directory. 
+        throw new Error(`You don't have permission to access a path out of the current working directory.
 Please double check your path input: ${filePath}.
-Your current working directory is: ${process.cwd()}`;
+Your current working directory is: ${process.cwd()}`);
     }
 
     const resolved = path.resolve(process.cwd(), filePath);
@@ -39,7 +39,7 @@ Your current working directory is: ${process.cwd()}`;
     try {
         content = readFileSync(resolved, "utf-8");
     } catch (err: any) {
-        return `[ERROR] Failed to read file: ${err.message}`;
+        throw new Error(`Failed to read file: ${err.message}`);
     }
 
     const lines = content.split("\n");
@@ -51,13 +51,13 @@ Your current working directory is: ${process.cwd()}`;
     const end = to ?? Math.min(start + MAX_LINES - 1, totalLines - 1);
 
     if (start < 0) {
-        return `[ERROR] "from" must not be less than 0 (got ${start})`;
+        throw new Error(`"from" must not be less than 0 (got ${start})`);
     }
     if (end >= totalLines) {
-        return `[ERROR] "to" must not exceed max line index ${totalLines - 1} (got ${end})`;
+        throw new Error(`"to" must not exceed max line index ${totalLines - 1} (got ${end})`);
     }
     if (start > end) {
-        return `[ERROR] "from" (${start}) must not be greater than "to" (${end})`;
+        throw new Error(`"from" (${start}) must not be greater than "to" (${end})`);
     }
 
     const selected = lines.slice(start, end + 1);

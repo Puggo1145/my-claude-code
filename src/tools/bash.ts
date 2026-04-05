@@ -39,7 +39,7 @@ function handler({ command, timeout = 10000 }: { command: string; timeout?: numb
     ];
     for (const pattern of DANGEROUS_PATTERNS) {
         if (pattern.test(command)) {
-            return `[BLOCKED] Dangerous command detected: "${command}"`;
+            throw new Error(`Dangerous command detected: "${command}"`);
         }
     }
 
@@ -53,11 +53,11 @@ function handler({ command, timeout = 10000 }: { command: string; timeout?: numb
         return result || "(no output)";
     } catch (err: any) {
         if (err.killed) {
-            return `[ERROR] Command timed out after ${timeout}ms`;
+            throw new Error(`Command timed out after ${timeout}ms`);
         }
         const stderr = err.stderr || "";
         const stdout = err.stdout || "";
-        return `[ERROR] Exit code ${err.status}\n${stdout}\n${stderr}`.trim();
+        throw new Error(`Exit code ${err.status}\n${stdout}\n${stderr}`.trim());
     }
 }
 

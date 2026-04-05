@@ -24,9 +24,9 @@ const definition: ToolDef = {
 
 function handler({ path: filePath, content }: { path: string; content: string }): string {
     if (!safePath(filePath)) {
-        return `[BLOCKED] You don't have permission to access a path out of the current working directory.
+        throw new Error(`You don't have permission to access a path out of the current working directory.
 Please double check your path input: ${filePath}.
-Your current working directory is: ${process.cwd()}`;
+Your current working directory is: ${process.cwd()}`);
     }
 
     const resolved = path.resolve(process.cwd(), filePath);
@@ -35,7 +35,7 @@ Your current working directory is: ${process.cwd()}`;
         mkdirSync(path.dirname(resolved), { recursive: true });
         writeFileSync(resolved, content, "utf-8");
     } catch (err: any) {
-        return `[ERROR] Failed to write file: ${err.message}`;
+        throw new Error(`Failed to write file: ${err.message}`);
     }
 
     const lineCount = content.split("\n").length;
